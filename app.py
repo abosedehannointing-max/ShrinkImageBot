@@ -66,7 +66,10 @@ TEXTS = {
     
     "please_send_image": "📸 Kirimkan gambar untuk dikompres.\n\nGunakan tombol di bawah atau ketik /cancel untuk membatalkan.",
     
-    "session_expired": "❌ Sesi habis. Kirim gambar lagi."
+    "session_expired": "❌ Sesi habis. Kirim gambar lagi.",
+    
+    "webhook_deleted": "✅ Webhook berhasil dihapus",
+    "restarting": "🔄 Memulai ulang bot..."
 }
 
 # Compression states
@@ -115,9 +118,6 @@ async def start_command(message: types.Message, state: FSMContext):
     
     # Clear any existing state
     await state.clear()
-    
-    # Delete webhook to ensure polling works
-    await bot.delete_webhook(drop_pending_updates=True)
     
     await message.answer(
         TEXTS["welcome"],
@@ -255,8 +255,16 @@ async def main():
     logger.info("🖼️ BOT KOMPRES GAMBAR DIMULAI")
     logger.info("🌐 Bahasa: Indonesia")
     
-    # Delete webhook on startup
-    await bot.delete_webhook(drop_pending_updates=True)
+    # FORCE DELETE WEBHOOK - This is the critical fix
+    logger.info("🔄 Menghapus webhook yang ada...")
+    try:
+        await bot.delete_webhook(drop_pending_updates=True)
+        logger.info("✅ Webhook berhasil dihapus")
+    except Exception as e:
+        logger.warning(f"⚠️ Gagal menghapus webhook: {e}")
+    
+    # Small delay to ensure webhook is fully deleted
+    await asyncio.sleep(1)
     
     me = await bot.get_me()
     logger.info(f"🤖 Bot: @{me.username}")
@@ -264,7 +272,12 @@ async def main():
     logger.info("=" * 45)
     logger.info("✅ Bot sedang berjalan...")
     
-    await dp.start_polling(bot)
+    # Start polling with error handling
+    try:
+        await dp.start_polling(bot)
+    except Exception as e:
+        logger.error(f"❌ Polling error: {e}")
+        raise
 
 if __name__ == "__main__":
     asyncio.run(main())
