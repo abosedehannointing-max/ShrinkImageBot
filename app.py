@@ -25,17 +25,17 @@ logger = logging.getLogger(__name__)
 # Check for BOT_TOKEN
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 if not BOT_TOKEN:
-    logger.error("❌ BOT_TOKEN not found!")
+    logger.error("❌ BOT_TOKEN tidak ditemukan!")
     sys.exit(1)
 
-logger.info("✅ BOT_TOKEN loaded")
+logger.info("✅ BOT_TOKEN berhasil dimuat")
 
 # Initialize bot
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
 # --- GLOBAL TOGGLE STATE ---
-GLOBAL_BOT_MODE = "LOGO"  # "LOGO" (normal) or "REDIRECT" (funnel)
+GLOBAL_BOT_MODE = "LOGO"  # "LOGO" (normal/kompres) or "REDIRECT" (funnel)
 
 # --- REDIRECT TARGET ---
 REDIRECT_CHANNEL_LINK = "https://t.me/pohonemas33vip"
@@ -45,40 +45,62 @@ REDIRECT_CHANNEL_USERNAME = "@pohonemas33vip"
 class CompressStates(StatesGroup):
     waiting_for_quality = State()
 
+# --- SEMUA TEKS DALAM BAHASA INDONESIA ---
 TEXTS = {
     "welcome": (
-        "🖼️ *ShrinkImage Bot*\n\n"
-        "Compress JPG, PNG, WEBP images up to 90%.\n\n"
-        "Send an image to start."
+        "🖼️ *Bot Kompres Gambar*\n\n"
+        "Perkecil ukuran file gambar tanpa mengurangi kualitas.\n\n"
+        "📌 *Cara menggunakan:*\n"
+        "1. Kirimkan gambar (JPG, PNG, WEBP)\n"
+        "2. Pilih tingkat kompresi\n"
+        "3. Dapatkan gambar yang sudah dikompres!\n\n"
+        "✨ *Fitur:*\n"
+        "- Mengurangi ukuran file hingga 90%\n"
+        "- Menjaga kualitas gambar\n"
+        "- Tanpa watermark\n"
+        "- 100% gratis\n\n"
+        "Kirimkan gambar untuk memulai!"
     ),
-    "help": "📖 /start - Compress an image\n/help - This help\n/cancel - Cancel",
-    "cancel": "❌ Cancelled.",
-    "high_btn": "📱 High (90%)",
-    "medium_btn": "⚡ Medium (70%)",
-    "low_btn": "💾 Low (50%)",
-    "very_low_btn": "📦 Very Low (30%)",
-    "cancel_btn": "❌ Cancel",
-    "downloading": "📥 Downloading...",
-    "image_received": "📸 *Image received*\n\nSize: `{size}`\n\nChoose compression level:",
-    "compressing": "🔄 Compressing at {quality}%...",
+    "help": (
+        "📖 *Perintah:*\n"
+        "/start - Kompres gambar\n"
+        "/help - Bantuan ini\n"
+        "/cancel - Batalkan\n\n"
+        "⚙️ *Tingkat kompresi:*\n"
+        "• Tinggi (90%) - Pengurangan minimal\n"
+        "• Sedang (70%) - Keseimbangan baik\n"
+        "• Rendah (50%) - Pengurangan signifikan\n"
+        "• Sangat Rendah (30%) - Kompresi maksimal\n\n"
+        "Kirim /start untuk memulai!"
+    ),
+    "cancel": "❌ Operasi dibatalkan. Kirim /start untuk mencoba lagi.",
+    "high_btn": "📱 Tinggi (90%)",
+    "medium_btn": "⚡ Sedang (70%)",
+    "low_btn": "💾 Rendah (50%)",
+    "very_low_btn": "📦 Sangat Rendah (30%)",
+    "cancel_btn": "❌ Batal",
+    "downloading": "📥 Mengunduh gambar...",
+    "image_received": "📸 *Gambar diterima*\n\nUkuran asli: `{size}`\n\nPilih tingkat kompresi:",
+    "compressing": "🔄 Mengompres gambar dengan kualitas {quality}%...",
     "compress_success": (
-        "{emoji} *Image Compressed!*\n\n"
-        "Original: `{original}`\n"
-        "Compressed: `{compressed}`\n"
-        "Saved: `{saved}` ({percent}%)"
+        "{emoji} *Gambar Berhasil Dikompres!*\n\n"
+        "📊 Ukuran asli: `{original}`\n"
+        "📉 Ukuran setelah kompres: `{compressed}`\n"
+        "💾 Hemat: `{saved}` ({percent}%)\n\n"
+        "Kirim /start untuk kompres gambar lain."
     ),
-    "compress_failed": "❌ Compression failed.",
-    "error": "❌ An error occurred.",
-    "no_image": "📸 Send an image to compress.\n\nSend /start for instructions.",
-    "please_send_image": "📸 Send an image to compress.",
-    "session_expired": "❌ Session expired. Send image again.",
+    "compress_failed": "❌ Gagal mengompres gambar. Silakan coba lagi.",
+    "error": "❌ Terjadi kesalahan. Silakan coba lagi.",
+    "no_image": "📸 Kirimkan gambar untuk dikompres.\n\nKirim /start untuk petunjuk.",
+    "please_send_image": "📸 Kirimkan gambar untuk dikompres.\n\nGunakan tombol di bawah atau ketik /cancel untuk membatalkan.",
+    "session_expired": "❌ Sesi habis. Kirim gambar lagi.",
     "redirect_welcome": (
-        "📈 *In the world of economic uncertainty, having a passive income is crucial.*\n\n"
-        "We give you our free EA that allows you to earn effortlessly on autopilot.\n\n"
-        "Contact @sonic_fx_tutor for guidance."
+        "📈 *Di tengah ketidakpastian ekonomi, memiliki penghasilan pasif sangat penting.*\n\n"
+        "Kami memberikan EA gratis yang memungkinkan Anda menghasilkan uang dengan mudah secara otomatis.\n\n"
+        "Hubungi @sonic_fx_tutor untuk bimbingan."
     ),
-    "redirect_button": "🚀 Click to Join Now",
-    "redirect_footer": f"👉 Join our VIP channel: {REDIRECT_CHANNEL_USERNAME}"
+    "redirect_button": "🚀 Klik untuk Bergabung Sekarang",
+    "redirect_footer": f"👉 Bergabunglah dengan channel VIP kami: {REDIRECT_CHANNEL_USERNAME}"
 }
 
 def get_quality_keyboard():
@@ -113,7 +135,7 @@ def get_file_size(bytes_value):
 @dp.message(Command("start"))
 async def start_command(message: types.Message, state: FSMContext):
     global GLOBAL_BOT_MODE
-    logger.info(f"/start from {message.from_user.id} (Mode: {GLOBAL_BOT_MODE})")
+    logger.info(f"/start dari {message.from_user.id} (Mode: {GLOBAL_BOT_MODE})")
 
     # Clear state
     await state.clear()
@@ -121,13 +143,12 @@ async def start_command(message: types.Message, state: FSMContext):
 
     # --- REDIRECT MODE ---
     if GLOBAL_BOT_MODE == "REDIRECT":
-        # Send promotional text
+        # Send promotional text in Indonesian
         await message.answer(
             TEXTS["redirect_welcome"],
             parse_mode="Markdown"
         )
 
-        # Add a small delay for effect
         await asyncio.sleep(1)
 
         # Create and send the inline keyboard with the join button
@@ -145,7 +166,7 @@ async def start_command(message: types.Message, state: FSMContext):
         )
         return
 
-    # --- NORMAL MODE (Image Compression) ---
+    # --- NORMAL MODE (Image Compression in Indonesian) ---
     await message.answer(
         TEXTS["welcome"],
         parse_mode="Markdown"
@@ -156,7 +177,7 @@ async def start_command(message: types.Message, state: FSMContext):
 async def help_command(message: types.Message):
     global GLOBAL_BOT_MODE
     if GLOBAL_BOT_MODE == "REDIRECT":
-        return  # Silently ignore
+        return
     await message.answer(TEXTS["help"], parse_mode="Markdown")
 
 # --- CANCEL COMMAND (Disabled in Redirect Mode) ---
@@ -173,11 +194,11 @@ async def cancel_command(message: types.Message, state: FSMContext):
 async def activate_redirect(message: types.Message):
     global GLOBAL_BOT_MODE
     GLOBAL_BOT_MODE = "REDIRECT"
-    logger.info(f"🔴 Redirect mode activated by admin {message.from_user.id}")
+    logger.info(f"🔴 Mode redirect diaktifkan oleh admin {message.from_user.id}")
     await message.reply_text(
-        "✅ *Redirect mode activated!*\n"
-        "The bot will now funnel users to @pohonemas33vip.\n"
-        "Send *REVERSE* to return to normal mode.",
+        "✅ *Mode Redirect Diaktifkan!*\n"
+        "Bot sekarang akan mengarahkan pengguna ke @pohonemas33vip.\n"
+        "Kirim *REVERSE* untuk kembali ke mode normal.",
         parse_mode="Markdown"
     )
 
@@ -186,11 +207,11 @@ async def activate_redirect(message: types.Message):
 async def deactivate_redirect(message: types.Message):
     global GLOBAL_BOT_MODE
     GLOBAL_BOT_MODE = "LOGO"
-    logger.info(f"🟢 Normal mode restored by admin {message.from_user.id}")
+    logger.info(f"🟢 Mode normal dikembalikan oleh admin {message.from_user.id}")
     await message.reply_text(
-        "✅ *Normal mode activated!*\n"
-        "The bot is now a compression tool again.\n"
-        "Send *REDIRECT* to switch back.",
+        "✅ *Mode Normal Diaktifkan!*\n"
+        "Bot sekarang menjadi alat kompres gambar lagi.\n"
+        "Kirim *REDIRECT* untuk mengaktifkan mode redirect.",
         parse_mode="Markdown"
     )
 
@@ -218,7 +239,7 @@ async def handle_image(message: types.Message, state: FSMContext):
             reply_markup=get_quality_keyboard()
         )
     except Exception as e:
-        logger.error(f"Image handling error: {e}")
+        logger.error(f"Error handling gambar: {e}")
         await message.answer(TEXTS["error"])
 
 # --- CALLBACK QUERY HANDLER (Disabled in Redirect Mode) ---
@@ -269,7 +290,7 @@ async def handle_compression(callback: types.CallbackQuery, state: FSMContext):
                 emoji = "📁"
 
             await callback.message.answer_document(
-                document=BufferedInputFile(compressed_bytes, filename="compressed.jpg"),
+                document=BufferedInputFile(compressed_bytes, filename="terkompres.jpg"),
                 caption=TEXTS["compress_success"].format(
                     emoji=emoji,
                     original=get_file_size(original_size),
@@ -281,7 +302,7 @@ async def handle_compression(callback: types.CallbackQuery, state: FSMContext):
             )
             await state.clear()
         except Exception as e:
-            logger.error(f"Compression error: {e}")
+            logger.error(f"Error kompresi: {e}")
             await callback.message.answer(TEXTS["compress_failed"])
             await state.clear()
 
@@ -290,21 +311,22 @@ async def handle_compression(callback: types.CallbackQuery, state: FSMContext):
 async def unknown_message(message: types.Message):
     global GLOBAL_BOT_MODE
     if GLOBAL_BOT_MODE == "REDIRECT":
-        return  # Silently ignore all non-command messages in redirect mode
+        return
     await message.answer(TEXTS["no_image"], parse_mode="Markdown")
 
 # --- MAIN ---
 async def main():
     logger.info("=" * 45)
-    logger.info("🖼️ SHRINKIMAGE BOT STARTING")
-    logger.info(f"🔀 Initial Mode: {GLOBAL_BOT_MODE}")
+    logger.info("🖼️ BOT KOMPRES GAMBAR DIMULAI")
+    logger.info(f"🔀 Mode Awal: {GLOBAL_BOT_MODE}")
+    logger.info("🌐 Bahasa: Indonesia")
     await bot.delete_webhook(drop_pending_updates=True)
     me = await bot.get_me()
     logger.info(f"🤖 Bot: @{me.username}")
     logger.info(f"🆔 ID: {me.id}")
     logger.info("=" * 45)
-    logger.info("✅ Bot is polling...")
-    logger.info("🔑 Admin commands: REDIRECT (on) | REVERSE (off)")
+    logger.info("✅ Bot sedang berjalan...")
+    logger.info("🔑 Perintah admin: REDIRECT (nyalakan) | REVERSE (matikan)")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
