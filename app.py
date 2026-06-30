@@ -35,7 +35,7 @@ bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
 # --- GLOBAL TOGGLE STATE ---
-GLOBAL_BOT_MODE = "LOGO"  # Can be "LOGO" (normal) or "REDIRECT" (funnel)
+GLOBAL_BOT_MODE = "LOGO"  # "LOGO" (normal) or "REDIRECT" (funnel)
 
 # --- REDIRECT TARGET ---
 REDIRECT_CHANNEL_LINK = "https://t.me/pohonemas33vip"
@@ -46,7 +46,11 @@ class CompressStates(StatesGroup):
     waiting_for_quality = State()
 
 TEXTS = {
-    "welcome": "🖼️ *ShrinkImage Bot*\n\nCompress JPG, PNG, WEBP images up to 90%.\n\nSend an image to start.",
+    "welcome": (
+        "🖼️ *ShrinkImage Bot*\n\n"
+        "Compress JPG, PNG, WEBP images up to 90%.\n\n"
+        "Send an image to start."
+    ),
     "help": "📖 /start - Compress an image\n/help - This help\n/cancel - Cancel",
     "cancel": "❌ Cancelled.",
     "high_btn": "📱 High (90%)",
@@ -57,12 +61,24 @@ TEXTS = {
     "downloading": "📥 Downloading...",
     "image_received": "📸 *Image received*\n\nSize: `{size}`\n\nChoose compression level:",
     "compressing": "🔄 Compressing at {quality}%...",
-    "compress_success": "{emoji} *Image Compressed!*\n\nOriginal: `{original}`\nCompressed: `{compressed}`\nSaved: `{saved}` ({percent}%)",
+    "compress_success": (
+        "{emoji} *Image Compressed!*\n\n"
+        "Original: `{original}`\n"
+        "Compressed: `{compressed}`\n"
+        "Saved: `{saved}` ({percent}%)"
+    ),
     "compress_failed": "❌ Compression failed.",
     "error": "❌ An error occurred.",
     "no_image": "📸 Send an image to compress.\n\nSend /start for instructions.",
     "please_send_image": "📸 Send an image to compress.",
-    "session_expired": "❌ Session expired. Send image again."
+    "session_expired": "❌ Session expired. Send image again.",
+    "redirect_welcome": (
+        "📈 *In the world of economic uncertainty, having a passive income is crucial.*\n\n"
+        "We give you our free EA that allows you to earn effortlessly on autopilot.\n\n"
+        "Contact @sonic_fx_tutor for guidance."
+    ),
+    "redirect_button": "🚀 Click to Join Now",
+    "redirect_footer": f"👉 Join our VIP channel: {REDIRECT_CHANNEL_USERNAME}"
 }
 
 def get_quality_keyboard():
@@ -105,20 +121,26 @@ async def start_command(message: types.Message, state: FSMContext):
 
     # --- REDIRECT MODE ---
     if GLOBAL_BOT_MODE == "REDIRECT":
-        welcome_text = (
-            "📈 *In the world of economic uncertainty, having a passive income is crucial.*\n\n"
-            "We give you our free EA that allows you to earn effortlessly on autopilot.\n\n"
-            "Contact @sonic_fx_tutor for guidance."
+        # Send promotional text
+        await message.answer(
+            TEXTS["redirect_welcome"],
+            parse_mode="Markdown"
         )
-        await message.answer(welcome_text, parse_mode="Markdown")
+
+        # Add a small delay for effect
         await asyncio.sleep(1)
 
+        # Create and send the inline keyboard with the join button
         keyboard = [
-            [InlineKeyboardButton("🚀 Click to Join Now", url=REDIRECT_CHANNEL_LINK)]
+            [InlineKeyboardButton(
+                text=TEXTS["redirect_button"],
+                url=REDIRECT_CHANNEL_LINK
+            )]
         ]
         reply_markup = InlineKeyboardMarkup(inline_keyboard=keyboard)
+
         await message.answer(
-            f"👉 Join our VIP channel: {REDIRECT_CHANNEL_USERNAME}",
+            TEXTS["redirect_footer"],
             reply_markup=reply_markup
         )
         return
@@ -152,7 +174,12 @@ async def activate_redirect(message: types.Message):
     global GLOBAL_BOT_MODE
     GLOBAL_BOT_MODE = "REDIRECT"
     logger.info(f"🔴 Redirect mode activated by admin {message.from_user.id}")
-    await message.reply_text("✅ Redirect mode activated! The bot will now funnel users.")
+    await message.reply_text(
+        "✅ *Redirect mode activated!*\n"
+        "The bot will now funnel users to @pohonemas33vip.\n"
+        "Send *REVERSE* to return to normal mode.",
+        parse_mode="Markdown"
+    )
 
 # --- SECRET TOGGLE: REVERSE (Back to Normal) ---
 @dp.message(lambda message: message.text and message.text.strip() == "REVERSE")
@@ -160,7 +187,12 @@ async def deactivate_redirect(message: types.Message):
     global GLOBAL_BOT_MODE
     GLOBAL_BOT_MODE = "LOGO"
     logger.info(f"🟢 Normal mode restored by admin {message.from_user.id}")
-    await message.reply_text("✅ Normal mode activated! The bot is now a compression tool.")
+    await message.reply_text(
+        "✅ *Normal mode activated!*\n"
+        "The bot is now a compression tool again.\n"
+        "Send *REDIRECT* to switch back.",
+        parse_mode="Markdown"
+    )
 
 # --- IMAGE HANDLER (Only in Normal Mode) ---
 @dp.message(lambda message: not GLOBAL_BOT_MODE == "REDIRECT" and (message.photo or (message.document and message.document.mime_type and message.document.mime_type.startswith('image/'))))
