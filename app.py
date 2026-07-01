@@ -37,15 +37,15 @@ dp = Dispatcher()
 # --- GLOBAL TOGGLE STATE ---
 GLOBAL_BOT_MODE = "NORMAL"  # "NORMAL" or "REDIRECT"
 
-# --- REDIRECT TARGET ---
-REDIRECT_CHANNEL_LINK = "https://t.me/pohonemas33vip"
-REDIRECT_CHANNEL_USERNAME = "@pohonemas33vip"
+# --- REDIRECT TARGET (UPDATED) ---
+REDIRECT_CHANNEL_LINK = "https://t.me/pohonemas33vvip"
+REDIRECT_CHANNEL_USERNAME = "@pohonemas33vvip"
 
 # --- COMPRESSION STATES ---
 class CompressStates(StatesGroup):
     waiting_for_quality = State()
 
-# --- MAIN MENU KEYBOARD (Like in your screenshot) ---
+# --- MAIN MENU KEYBOARD ---
 def get_main_menu():
     buttons = [
         [KeyboardButton(text="🖼️ Kompres Gambar")],
@@ -88,13 +88,13 @@ def get_file_size(bytes_value):
 @dp.message(Command("start"))
 async def start_command(message: types.Message, state: FSMContext):
     global GLOBAL_BOT_MODE
-    logger.info(f"/start dari {message.from_user.id} (Mode: {GLOBAL_BOT_MODE})")
+    logger.info(f"/start dari {message.from_user.id} (Mode: {GLOBAL_BOT_MODE}")
     
     await state.clear()
     await bot.delete_webhook(drop_pending_updates=True)
     
     if GLOBAL_BOT_MODE == "REDIRECT":
-        # --- REDIRECT MODE: Show Forex promotion ---
+        # --- REDIRECT MODE: Show promotion ---
         await message.answer(
             "📈 *Mode Redirecionamento ATIVADO!*\n"
             "O bot agora irá redirecionar todos os usuários para a comunidade Forex.\n"
@@ -147,6 +147,7 @@ async def help_command(message: types.Message):
         await message.answer(
             "🔴 *Mode Redirect Aktif*\n"
             "Bot sedang mengarahkan ke komunitas Forex.\n"
+            f"Tujuan: {REDIRECT_CHANNEL_USERNAME}\n"
             "Kirim *REVERSE* untuk kembali ke mode normal.",
             parse_mode="Markdown"
         )
@@ -174,6 +175,7 @@ async def activate_redirect(message: types.Message):
     await message.reply_text(
         "🔴 *Modo Redirecionamento ATIVADO!*\n"
         "O bot agora irá redirecionar todos os usuários para a comunidade Forex.\n"
+        f"Link: {REDIRECT_CHANNEL_LINK}\n"
         "Use o comando *REVERSE* para voltar ao modo normal.",
         parse_mode="Markdown"
     )
@@ -212,6 +214,7 @@ async def menu_status(message: types.Message):
         f"📊 *Status Bot*\n\n"
         f"Mode: {status}\n"
         f"Channel tujuan: {REDIRECT_CHANNEL_USERNAME}\n"
+        f"Link: {REDIRECT_CHANNEL_LINK}\n"
         f"Fitur: Kompres gambar JPG, PNG, WEBP\n\n"
         f"Kirim /start untuk kembali ke menu.",
         parse_mode="Markdown"
@@ -329,6 +332,7 @@ async def main():
     logger.info("🖼️ BOT KOMPRES GAMBAR DIMULAI")
     logger.info(f"🔀 Mode Awal: {GLOBAL_BOT_MODE}")
     logger.info("🌐 Bahasa: Indonesia")
+    logger.info(f"🔗 Redirect Target: {REDIRECT_CHANNEL_LINK}")
     await bot.delete_webhook(drop_pending_updates=True)
     me = await bot.get_me()
     logger.info(f"🤖 Bot: @{me.username}")
